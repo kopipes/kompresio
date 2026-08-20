@@ -40,16 +40,12 @@ struct ImageProcessor {
         let ext: String
 
         switch preset.format {
-        case .webp:
-            // macOS 14+ supports WebP via ImageIO
-            outData = encodeWithImageIO(bitmap: bitmap, uti: UTType.webP, quality: preset.quality)
-            ext = "webp"
-        case .jpeg:
-            outData = bitmap.representation(using: .jpeg, properties: [.compressionFactor: preset.quality])
-            ext = "jpg"
         case .heic:
             outData = encodeWithImageIO(bitmap: bitmap, uti: UTType(filenameExtension: "heic") ?? .jpeg, quality: preset.quality)
             ext = "heic"
+        case .jpeg:
+            outData = bitmap.representation(using: .jpeg, properties: [.compressionFactor: preset.quality])
+            ext = "jpg"
         case .png:
             outData = bitmap.representation(using: .png, properties: [:])
             ext = "png"
