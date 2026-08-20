@@ -40,18 +40,9 @@ struct ImageProcessor {
         let ext: String
 
         switch preset.format {
-        case .heic:
-            outData = encodeWithImageIO(bitmap: bitmap, uti: "public.heic", quality: preset.quality)
-            ext = "heic"
-        case .avif:
-            outData = encodeWithImageIO(bitmap: bitmap, uti: "public.avif", quality: preset.quality)
-            ext = "avif"
         case .jpeg:
             outData = bitmap.representation(using: .jpeg, properties: [.compressionFactor: preset.quality])
             ext = "jpg"
-        case .jpeg2k:
-            outData = encodeWithImageIO(bitmap: bitmap, uti: "public.jpeg-2000", quality: preset.quality)
-            ext = "jp2"
         case .png:
             outData = bitmap.representation(using: .png, properties: [:])
             ext = "png"
