@@ -70,6 +70,20 @@ final class StatusBarController: NSObject {
     // MARK: - Actions
 
     @objc private func togglePopover() {
+        let event = NSApp.currentEvent
+        // Right-click → show context menu with Quit
+        if event?.type == .rightMouseUp {
+            let menu = NSMenu()
+            menu.addItem(NSMenuItem(title: "Kompresio v1.0", action: nil, keyEquivalent: ""))
+            menu.addItem(.separator())
+            menu.addItem(NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q"))
+            statusItem.menu = menu
+            statusItem.button?.performClick(nil)
+            // Remove menu after use so left-click still works
+            DispatchQueue.main.async { self.statusItem.menu = nil }
+            return
+        }
+        // Left-click → toggle popover
         if popover.isShown {
             popover.performClose(nil)
         } else {
@@ -77,6 +91,10 @@ final class StatusBarController: NSObject {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             popover.contentViewController?.view.window?.makeKey()
         }
+    }
+
+    @objc private func quitApp() {
+        NSApplication.shared.terminate(nil)
     }
 
     func handleDroppedURLs(_ urls: [URL]) {
