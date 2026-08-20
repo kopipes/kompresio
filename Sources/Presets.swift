@@ -15,7 +15,6 @@ struct Preset: Identifiable, Hashable {
 
 let allPresets: [Preset] = [
     // JPEG tiers — convert anything to JPEG at various quality levels
-    Preset(id: "high",     name: "High",     maxDimension: 0,    quality: 0.90, format: .jpeg),
     Preset(id: "balanced", name: "Balanced", maxDimension: 2560, quality: 0.75, format: .jpeg),
     Preset(id: "small",    name: "Small",    maxDimension: 1920, quality: 0.55, format: .jpeg),
     Preset(id: "tiny",     name: "Tiny",     maxDimension: 1280, quality: 0.35, format: .jpeg),
