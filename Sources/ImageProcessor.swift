@@ -41,11 +41,17 @@ struct ImageProcessor {
 
         switch preset.format {
         case .heic:
-            outData = encodeWithImageIO(bitmap: bitmap, uti: UTType(filenameExtension: "heic") ?? .jpeg, quality: preset.quality)
+            outData = encodeWithImageIO(bitmap: bitmap, uti: "public.heic", quality: preset.quality)
             ext = "heic"
+        case .avif:
+            outData = encodeWithImageIO(bitmap: bitmap, uti: "public.avif", quality: preset.quality)
+            ext = "avif"
         case .jpeg:
             outData = bitmap.representation(using: .jpeg, properties: [.compressionFactor: preset.quality])
             ext = "jpg"
+        case .jpeg2k:
+            outData = encodeWithImageIO(bitmap: bitmap, uti: "public.jpeg-2000", quality: preset.quality)
+            ext = "jp2"
         case .png:
             outData = bitmap.representation(using: .png, properties: [:])
             ext = "png"
@@ -93,10 +99,10 @@ struct ImageProcessor {
         return result
     }
 
-    private static func encodeWithImageIO(bitmap: NSBitmapImageRep, uti: UTType, quality: Double) -> Data? {
+    private static func encodeWithImageIO(bitmap: NSBitmapImageRep, uti: String, quality: Double) -> Data? {
         guard let cgImage = bitmap.cgImage else { return nil }
         let data = NSMutableData()
-        guard let dest = CGImageDestinationCreateWithData(data, uti.identifier as CFString, 1, nil) else { return nil }
+        guard let dest = CGImageDestinationCreateWithData(data, uti as CFString, 1, nil) else { return nil }
         let opts: [CFString: Any] = [
             kCGImageDestinationLossyCompressionQuality: quality
         ]
