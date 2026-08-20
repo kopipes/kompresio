@@ -20,5 +20,6 @@ let allPresets: [Preset] = [
     Preset(id: "small",    name: "Small",    maxDimension: 1920, quality: 0.55, format: .jpeg),
     Preset(id: "tiny",     name: "Tiny",     maxDimension: 1280, quality: 0.35, format: .jpeg),
     // PNG — keeps transparency, shrinks by resizing dimensions only
-    Preset(id: "png",      name: "PNG",      maxDimension: 2560, quality: 1.0,  format: .png),
+    Preset(id: "png2560",  name: "PNG 2560", maxDimension: 2560, quality: 1.0,  format: .png),
+    Preset(id: "png1920",  name: "PNG 1920", maxDimension: 1920, quality: 1.0,  format: .png),
 ]
