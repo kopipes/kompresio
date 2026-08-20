@@ -77,6 +77,7 @@ struct JobResult: Identifiable {
 
 struct ContentView: View {
     @ObservedObject var viewModel: ContentViewModel
+    var onClose: (() -> Void)? = nil
     @State private var isDragOver = false
 
     var body: some View {
@@ -105,7 +106,7 @@ struct ContentView: View {
                     .scaleEffect(0.7)
                     .frame(width: 18, height: 18)
             }
-            Button(action: { NSApplication.shared.terminate(nil) }) {
+            Button(action: { onClose?() }) {
                 Image(systemName: "xmark.circle.fill")
                     .foregroundStyle(.secondary)
             }
