@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 @MainActor
-final class StatusBarController: NSObject {
+final class StatusBarController: NSObject, NSMenuDelegate {
     private var statusItem: NSStatusItem!
     private var popover: NSPopover!
     private var contentViewModel = ContentViewModel()
@@ -25,10 +25,6 @@ final class StatusBarController: NSObject {
             button.action = #selector(togglePopover)
             button.target = self
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
-
-            // Register for drag & drop on the status bar button
-            button.registerForDraggedTypes([.fileURL])
-            // We'll use a custom drag view wrapper instead
         }
 
         setupDragOverlay()
@@ -49,10 +45,8 @@ final class StatusBarController: NSObject {
     // MARK: - Drag support on status button
 
     private func setupDragOverlay() {
-        // Attach a drag-destination view on top of the status button
         guard let button = statusItem.button,
-              let window = button.window else {
-            // Window may not exist yet — retry after a tick
+              let _ = button.window else {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
                 self?.setupDragOverlay()
             }
@@ -64,25 +58,18 @@ final class StatusBarController: NSObject {
         }
         dragView.autoresizingMask = [.width, .height]
         button.addSubview(dragView)
-        _ = window // silence warning
     }
 
     // MARK: - Actions
 
     @objc private func togglePopover() {
         let event = NSApp.currentEvent
-        // Right-click → show context menu with Quit
+
         if event?.type == .rightMouseUp {
-            let menu = NSMenu()
-            menu.addItem(NSMenuItem(title: "Kompresio v1.0", action: nil, keyEquivalent: ""))
-            menu.addItem(.separator())
-            menu.addItem(NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q"))
-            statusItem.menu = menu
-            statusItem.button?.performClick(nil)
-            // Remove menu after use so left-click still works
-            DispatchQueue.main.async { self.statusItem.menu = nil }
+            showContextMenu()
             return
         }
+
         // Left-click → toggle popover
         if popover.isShown {
             popover.performClose(nil)
@@ -90,6 +77,31 @@ final class StatusBarController: NSObject {
             guard let button = statusItem.button else { return }
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             popover.contentViewController?.view.window?.makeKey()
+        }
+    }
+
+    private func showContextMenu() {
+        let menu = NSMenu()
+        menu.delegate = self
+
+        let title = NSMenuItem(title: "Kompresio v1.0", action: nil, keyEquivalent: "")
+        title.isEnabled = false
+        menu.addItem(title)
+        menu.addItem(.separator())
+
+        let quitItem = NSMenuItem(title: "Quit Kompresio", action: #selector(quitApp), keyEquivalent: "")
+        quitItem.target = self
+        menu.addItem(quitItem)
+
+        // Temporarily assign menu so system can display it
+        statusItem.menu = menu
+        statusItem.button?.performClick(nil)
+    }
+
+    // NSMenuDelegate — clear menu after it closes so left-click still triggers our action
+    nonisolated func menuDidClose(_ menu: NSMenu) {
+        Task { @MainActor in
+            self.statusItem.menu = nil
         }
     }
 
@@ -101,7 +113,6 @@ final class StatusBarController: NSObject {
         let imageURLs = urls.filter { $0.isImageFile }
         guard !imageURLs.isEmpty else { return }
 
-        // Show popover so user can see progress
         if !popover.isShown, let button = statusItem.button {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         }
